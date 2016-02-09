@@ -38,12 +38,6 @@ def leg_dk(theta1, theta2, theta3, origin = {"x":0, "y":0, "z":0}, l1=L1, l2=L2,
         "y": (l1 + d12 + d23) * math.sin(theta1),
         "z": p2["z"] + l3 * math.sin(theta2 + theta3)
     }
-    # p3 = {
-    #     "x": l1 * math.cos(theta1) + l2 * math.cos(theta1) * math.cos(theta2) + l3 * math.cos(theta2 + theta3) * math.cos(theta1),
-    #     "y": l1 * math.sin(theta1) + l2 * math.sin(theta1) * math.cos(theta2) + l3 * math.sin(theta2 + theta3) * math.sin(theta1),
-    #     "z": p1["z"] + l2 * math.sin(theta2) + l3 * math.sin(theta2 + theta3)
-    # }
-    
     
     return p3
 
