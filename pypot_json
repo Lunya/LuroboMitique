@@ -1,0 +1,11 @@
+import itertools
+import time
+import numpy
+import pypot.dynamixel
+import pypot.dynamixel.motor
+import pypot.robot
+import math
+
+with closing (from_json('robotConfig.json')) as robot:
+		#We code Here
+		m.complient = false
