@@ -43,19 +43,82 @@ def leg_ik(x,y,z,l1=L1, l2=L2, l3=L3, alpha=ALPHA, beta=BETA):
         theta2C = -theta2 - alpha
     return [math.degrees(theta1), math.degrees(theta2C), math.degrees(theta3C)]
 
+def base_pos(robot):
+	for m in robot.motors:			
+			m.compliant = False
+			m.goal_position = 0
+	robot.motor_21.goal_position = -45
+	robot.motor_31.goal_position = 45
+	robot.motor_51.goal_position = -45
+	robot.motor_61.goal_position = 45
+	time.sleep(1)
+
+
+
 if __name__ == '__main__':
 
-	with closing(pypot.robot.from_json('robotConfig.json')) as robot:
-		#We code Here
-		#robot.goto_position({'motor_11':-50},0.2,'dummy', False)
-		for m in robot.wraists:
-				m.compliant = False
+	with closing(pypot.robot.from_json('robotConfig2.json')) as robot:
+		#Allow motors to move and initialize them
+		'''
+		for m in robot.motors:			
+			m.compliant = False
+			m.goal_position = 0
+		'''
+		base_pos(robot)
+		for m in robot.duplet:
+			for n in m.shoulders:
+				m.goal_position = 15
+		'''
 		sign = 1
 		while True:
 			sign = sign * -1
-			for m in robot.wraists:
+			for m in robot.shoulders:
 				m.compliant = False
 				m.goal_position = 10*sign
 			time.sleep(0.5)
+		'''
+		'''
+		time.sleep(0.5)
+		for m in robot.leg1:
+			m.goal_position=20
+		time.sleep(0.5)
+		for m in robot.leg2:
+			m.goal_position=20
+		time.sleep(0.5)
+		for m in robot.leg3:
+			m.goal_position=20
+		time.sleep(0.5)
+		for m in robot.leg4:
+			m.goal_position=20
+		time.sleep(0.5)
+		for m in robot.leg5:
+			m.goal_position=20
+		time.sleep(0.5)
+		for m in robot.leg6:
+			m.goal_position=20
+		time.sleep(0.5)
+
+		for m in robot.leg1:
+			m.goal_position=0
+		time.sleep(0.5)
+		for m in robot.leg2:
+			m.goal_position=0
+		time.sleep(0.5)
+		for m in robot.leg3:
+			m.goal_position=0
+		time.sleep(0.5)
+		for m in robot.leg4:
+			m.goal_position=0
+		time.sleep(0.5)
+		for m in robot.leg5:
+			m.goal_position=0
+		time.sleep(0.5)
+		for m in robot.leg6:
+			m.goal_position=0
+		time.sleep(0.5)
+		'''
+		#Forbid motors to move
+		for m in robot.motors:			
+			m.compliant = True
 
 

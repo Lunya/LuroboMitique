@@ -71,8 +71,12 @@ if __name__ == '__main__':
         # we get the current positions
         #print 'Current pos:', dxl_io.get_present_position(found_ids)
 	
-	pos = dict(zip(found_ids,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]))
-	dxl_io.set_goal_position(pos)
+	#pos = dict(zip(found_ids,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]))
+	print 'Temperature Limite : ', dxl_io.get_highest_temperature_limit(found_ids)
+	while True:
+		print 'Temperature Actuelle : ', dxl_io.get_present_temperature(found_ids)
+		time.sleep(1)
+	#dxl_io.set_goal_position(pos)
 	time.sleep(1)
 	
 	#move_leg(dxl_io, found_ids, 150, 0, 0)
