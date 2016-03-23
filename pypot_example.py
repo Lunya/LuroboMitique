@@ -59,8 +59,8 @@ if __name__ == '__main__':
     with pypot.dynamixel.io.io.DxlIO('/dev/ttyUSB0', baudrate=1000000) as dxl_io:
 	
         # we can scan the motors
-        #found_ids = dxl_io.scan()  # this may take several seconds
-	found_ids = [11,12,13,21,22,23,31,32,33,41,42,43,51,52,53,61,62,63]        
+        found_ids = dxl_io.scan()  # this may take several seconds
+	#found_ids = [11,12,13,21,22,23,31,32,33,41,42,43,51,52,53,61,62,63]        
 	print 'Detected:', found_ids
 	#dxl_io.enable_torque(found_ids)
 	#print 'Limites : ' , dxl_io.get_angle_limit(found_ids)
