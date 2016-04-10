@@ -133,15 +133,23 @@ def move_leg(robot, id, coord):
 	robot.motors['motor_'+str(id)+'3'].goal_position = angle[2];
 	'''
 
+def step(i):
+	coord = {
+        "x": 0,
+        "y": 0,
+        "z": 40 * math.log(max(1, 1 + math.cos(i)*100),100)
+    	} 
+	return coord
+
 if __name__ == '__main__':
 
-	with closing(pypot.robot.from_json('robotConfig.json')) as robot:
+	with closing(pypot.robot.from_json('robotConfig2.json')) as robot:
 		#Allow motors to move and initialize them
 		
 		for m in robot.motors:			
 			m.compliant = False
 			m.goal_position = 0
-		time.sleep(2)
+		time.sleep(0.5)
 		
 		coord1 = {
         "x": 150,
@@ -153,31 +161,69 @@ if __name__ == '__main__':
         "y": 0,
         "z": 0
     	}
+		
 		i = 0
 		while True:
-			
+			'''
 			coord1["z"] = 100*math.log(max(1, 1 + math.cos(i)*100),100) - 50
 			coord1["y"] = math.sin(i)* 100
 
 			coord2["z"] = 100*math.log(max(1, 1 + math.cos(i+math.pi)*100),100) - 50
 			coord2["y"] = math.sin(i)* 100
-			move_leg(robot, 1, coord1)
-			move_leg(robot, 4, coord2)
-			i+=0.02
-			time.sleep(0.02)
+			'''
+			leg1 = step(i + math.pi)
+			leg1["z"] = -leg1["z"]
+			leg1["x"] += 100
+			leg1["y"] = math.cos(i - (math.pi / 2)) * 50
+			leg1["z"] += -100
+			leg3 = step(i + math.pi)
+			leg3["z"] = -leg3["z"]
+			leg3["y"] += 40
+			leg3["x"] = math.cos(i + (math.pi / 2)) * 50 + 100
+			leg3["z"] += -100
+			leg5 = step(i + math.pi)
+			leg5["z"] = -leg5["z"]
+			leg5["y"] += -40
+			leg5["x"] = math.cos(i - (math.pi / 2)) * 50 + 100
+			leg5["z"] += -100
+
+			leg2 = step(i + math.pi)
+			leg2["z"] = -leg5["z"]
+			leg2["y"] += -40
+			leg2["x"] = math.cos(i - (math.pi / 2)) * 50 + 100
+			leg2["z"] += -100
+			leg4 = step(i + math.pi)
+			leg4["z"] = -leg1["z"]
+			leg4["x"] += 100
+			leg4["y"] = math.cos(i - (math.pi / 2)) * 50
+			leg4["z"] += -100
+			leg6 = step(i + math.pi)
+			leg6["z"] = -leg1["z"]
+			leg6["x"] += 100
+			leg6["y"] = math.cos(i - (math.pi / 2)) * 50
+			leg6["z"] += -100
+
+			#move_leg(robot, 1, leg1)
+			move_leg(robot, 2, leg1)
+			#move_leg(robot, 3, leg3)
+			move_leg(robot, 4, leg1)
+			#move_leg(robot, 5, leg5)
+			move_leg(robot, 6, leg1)
+
+			i+=0.1
+			time.sleep(0.05)
 		
-		'''
-		robot.motor_21.goal_position = 45
-	
+		
+		robot.motor_21.goal_position = -45
+		
 		robot.motor_31.goal_position = 45
-
-		robot.motor_41.goal_position = -45
-
+		
+		
 		robot.motor_51.goal_position = -45
 
-		robot.motor_61.goal_position = -45
-		'''
-		time.sleep(2)
+		robot.motor_61.goal_position = 45
+		
+		time.sleep(0.5)
 	
 		#base_pos(robot)
 		'''

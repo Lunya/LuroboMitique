@@ -76,12 +76,6 @@
          "motor_43",
          "motor_53",
          "motor_63"
-      ],
-      "duplet":[
-         "shoulders":[
-            "motor_11",
-            "motor_41"
-         ]
       ]
    },
    "motors":{

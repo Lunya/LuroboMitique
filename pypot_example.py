@@ -56,7 +56,7 @@ def move_leg(dxl_io, ids, x, y, z):
 if __name__ == '__main__':
 
     # we first open the Dynamixel serial port
-    with pypot.dynamixel.io.io.DxlIO('/dev/ttyUSB0', baudrate=1000000) as dxl_io:
+    with pypot.dynamixel.io.io.DxlIO('/dev/ttyACM0', baudrate=1000000) as dxl_io:
 	
         # we can scan the motors
         found_ids = dxl_io.scan()  # this may take several seconds
@@ -65,16 +65,20 @@ if __name__ == '__main__':
 	#dxl_io.enable_torque(found_ids)
 	#print 'Limites : ' , dxl_io.get_angle_limit(found_ids)
         # we power on the motors
-	
+	#dxl_io.change_id({found_ids[0] : 33})
+	dxl_io.change_id({33:23})
 	#dxl_io.set_goal_position({63:20})
+	angles = { 0 , 0 , 0}
+	pos = dict(zip(found_ids, itertools.repeat(0)))
+	dxl_io.set_goal_position(pos)
 	time.sleep(1)
         # we get the current positions
         #print 'Current pos:', dxl_io.get_present_position(found_ids)
-	
 	#pos = dict(zip(found_ids,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]))
 	print 'Temperature Limite : ', dxl_io.get_highest_temperature_limit(found_ids)
 	while True:
-		print 'Temperature Actuelle : ', dxl_io.get_present_temperature(found_ids)
+		print 'Temperature Actuelle : ', dxl_io.get_present_temperature(found_ids[6])
+		
 		time.sleep(1)
 	#dxl_io.set_goal_position(pos)
 	time.sleep(1)
