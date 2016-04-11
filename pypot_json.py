@@ -110,176 +110,150 @@ def base_pos(robot):
 	robot.motor_61.goal_position = -15
 	time.sleep(2)
 
+def calc_leg(id, coord):
+	newX = coord["x"]
+	newY = coord["y"]
+	newZ = coord["z"]	
+	if id==1:
+		newX = -coord["y"] - 102
+		newY = coord["x"]
+	elif id==2:
+		newX = coord["x"]
+		newY = coord["y"]
+		newY = newY + 24
+		newX = newX - 74 
+	elif id==3:
+		newX = coord["x"]
+		newY = coord["y"]
+		newY = newY - 24
+		newX = newX - 74
+	elif id==4:
+		newX = coord["y"] - 102
+		newY = -coord["x"]
+	elif id==5:
+		newX = -coord["x"]
+		newY = -coord["y"]
+		newY = newY + 24
+		newX = newX - 74
+	elif id==6:
+		newX = -coord["x"]
+		newY = -coord["y"]
+		newY = newY - 24
+		newX = newX - 74
+	return {"x":newX, "y":newY, "z":coord["z"]}
+
 def move_leg(robot, id, coord):
-	print coord
-	angle = computeIK(coord["x"], coord["y"], coord["z"])
-	print angle
+	newCoord = calc_leg(id, coord)
+	angle = computeIK(newCoord["x"], newCoord["y"], newCoord["z"])
 	for m in robot.motors:
 		if m.id == id*10+1:
 			m.goal_position = angle[0]
-			print "Jambe 11"
-			print m.id
 		if m.id == id*10+2:
 			m.goal_position = angle[1]
-			print "Jambe 12"
-			print m.id
 		if m.id == id*10+3:
 			m.goal_position = angle[2]
-			print "Jambe 13"
-			print m.id
-	'''
-	robot.motors['motor_'+str(id)+'1'].goal_position = angle[0];
-	robot.motors['motor_'+str(id)+'2'].goal_position = angle[1];
-	robot.motors['motor_'+str(id)+'3'].goal_position = angle[2];
-	'''
 
 def step(i):
 	coord = {
         "x": 0,
         "y": 0,
-        "z": 40 * math.log(max(1, 1 + math.cos(i)*100),100)
+        "z": math.log(max(1, 1 + math.cos(i)*10),10)
     	} 
 	return coord
+
+def rotateXY(x, y, z, theta):
+	theta = math.radians(theta)
+	return {"y": (math.cos(theta) * x) +
+		(math.sin(theta) * y),
+		"x": (-math.sin(theta) * x) +
+		(math.cos(theta)) * y,
+		"z": z}
 
 if __name__ == '__main__':
 
 	with closing(pypot.robot.from_json('robotConfig2.json')) as robot:
 		#Allow motors to move and initialize them
-		
+		coord = {
+					"x": 0,
+					"y": 0,
+					"z": -50
+		}
 		for m in robot.motors:			
 			m.compliant = False
-			m.goal_position = 0
-		time.sleep(0.5)
-		
-		coord1 = {
-        "x": 150,
-        "y": 0,
-        "z": 0
-    	}
-		coord2 = {
-        "x": 150,
-        "y": 0,
-        "z": 0
-    	}
+			#m.goal_position = 0
+		time.sleep(0.1)
+
+		move_leg(robot, 1, {"x":0, "y":-200, "z":-120})	
+		move_leg(robot, 2, {"x":150, "y":-80, "z":-120})
+		move_leg(robot, 3, {"x":150, "y":80, "z":-120})
+		move_leg(robot, 4, {"x":0, "y":200, "z":-120})
+		move_leg(robot, 5, {"x":-150, "y":80, "z":-120})
+		move_leg(robot, 6, {"x":-150, "y":-80, "z":-120})
+
+		time.sleep(3)
+
+		print rotateXY(0, 0, 0, 30)
 		
 		i = 0
+		cpt = 0
+		height = 120
+		amplitude = 30
+		stepHeight = 40
+		angle = 30
 		while True:
-			'''
-			coord1["z"] = 100*math.log(max(1, 1 + math.cos(i)*100),100) - 50
-			coord1["y"] = math.sin(i)* 100
+			leg1 = step(i + (math.pi / 2))
+			tmp = rotateXY(0, (math.cos(i) * amplitude), 0, angle)
+			print tmp
+			leg1["z"] *= stepHeight
+			leg1["x"] = 0 + tmp["x"]
+			leg1["y"] = -200 + tmp["y"]
+			leg1["z"] += -height
+			
+			leg3 = step(i + (math.pi / 2))
+			leg3["z"] *= stepHeight
+			leg3["x"] = 150 + tmp["x"]
+			leg3["y"] = 80 + tmp["y"]
+			leg3["z"] += -height
 
-			coord2["z"] = 100*math.log(max(1, 1 + math.cos(i+math.pi)*100),100) - 50
-			coord2["y"] = math.sin(i)* 100
-			'''
-			leg1 = step(i + math.pi)
-			leg1["z"] = -leg1["z"]
-			leg1["x"] += 100
-			leg1["y"] = math.cos(i - (math.pi / 2)) * 50
-			leg1["z"] += -100
-			leg3 = step(i + math.pi)
-			leg3["z"] = -leg3["z"]
-			leg3["y"] += 40
-			leg3["x"] = math.cos(i + (math.pi / 2)) * 50 + 100
-			leg3["z"] += -100
-			leg5 = step(i + math.pi)
-			leg5["z"] = -leg5["z"]
-			leg5["y"] += -40
-			leg5["x"] = math.cos(i - (math.pi / 2)) * 50 + 100
-			leg5["z"] += -100
+			leg5 = step(i + (math.pi / 2))
+			leg5["z"] *= stepHeight
+			leg5["x"] = -150 + tmp["x"]
+			leg5["y"] = 80 + tmp["y"]
+			leg5["z"] += -height
 
-			leg2 = step(i + math.pi)
-			leg2["z"] = -leg5["z"]
-			leg2["y"] += -40
-			leg2["x"] = math.cos(i - (math.pi / 2)) * 50 + 100
-			leg2["z"] += -100
-			leg4 = step(i + math.pi)
-			leg4["z"] = -leg1["z"]
-			leg4["x"] += 100
-			leg4["y"] = math.cos(i - (math.pi / 2)) * 50
-			leg4["z"] += -100
-			leg6 = step(i + math.pi)
-			leg6["z"] = -leg1["z"]
-			leg6["x"] += 100
-			leg6["y"] = math.cos(i - (math.pi / 2)) * 50
-			leg6["z"] += -100
+			tmp = rotateXY(0, -(math.cos(i) * amplitude), 0, angle)
+			
+			leg4 = step(i - (math.pi / 2))
+			leg4["z"] *= stepHeight
+			leg4["x"] = 0 + tmp["x"]
+			leg4["y"] = 200 + tmp["y"]
+			leg4["z"] += -height
 
-			#move_leg(robot, 1, leg1)
-			move_leg(robot, 2, leg1)
-			#move_leg(robot, 3, leg3)
-			move_leg(robot, 4, leg1)
-			#move_leg(robot, 5, leg5)
-			move_leg(robot, 6, leg1)
+			leg2 = step(i - (math.pi / 2))
+			leg2["z"] *= stepHeight
+			leg2["x"] = 150 + tmp["x"]
+			leg2["y"] = -80 + tmp["y"]
+			leg2["z"] += -height
 
-			i+=0.1
+			leg6 = step(i - (math.pi / 2))
+			leg6["z"] *= stepHeight
+			leg6["x"] = -150 + tmp["x"]
+			leg6["y"] = -80 + tmp["y"]
+			leg6["z"] += -height	
+
+			move_leg(robot, 1, leg1)
+			move_leg(robot, 2, leg2)
+			move_leg(robot, 3, leg3)
+			move_leg(robot, 4, leg4)
+			move_leg(robot, 5, leg5)
+			move_leg(robot, 6, leg6)
+
+			i+=0.2
+			cpt+=1
+			if cpt%75 ==0:
+				angle+=60
 			time.sleep(0.05)
 		
-		
-		robot.motor_21.goal_position = -45
-		
-		robot.motor_31.goal_position = 45
-		
-		
-		robot.motor_51.goal_position = -45
-
-		robot.motor_61.goal_position = 45
-		
-		time.sleep(0.5)
-	
-		#base_pos(robot)
-		'''
-		for m in robot.duplet:
-			for n in m.shoulders:
-				m.goal_position = 15
-		'''
-		'''
-		sign = 1
-		while True:
-			sign = sign * -1
-			for m in robot.shoulders:
-				m.compliant = False
-				m.goal_position = 10*sign
-			time.sleep(0.5)
-		'''
-		'''
-		time.sleep(0.5)
-		for m in robot.leg1:
-			m.goal_position=20
-		time.sleep(0.5)
-		for m in robot.leg2:
-			m.goal_position=20
-		time.sleep(0.5)
-		for m in robot.leg3:
-			m.goal_position=20
-		time.sleep(0.5)
-		for m in robot.leg4:
-			m.goal_position=20
-		time.sleep(0.5)
-		for m in robot.leg5:
-			m.goal_position=20
-		time.sleep(0.5)
-		for m in robot.leg6:
-			m.goal_position=20
-		time.sleep(0.5)
-
-		for m in robot.leg1:
-			m.goal_position=0
-		time.sleep(0.5)
-		for m in robot.leg2:
-			m.goal_position=0
-		time.sleep(0.5)
-		for m in robot.leg3:
-			m.goal_position=0
-		time.sleep(0.5)
-		for m in robot.leg4:
-			m.goal_position=0
-		time.sleep(0.5)
-		for m in robot.leg5:
-			m.goal_position=0
-		time.sleep(0.5)
-		for m in robot.leg6:
-			m.goal_position=0
-		time.sleep(0.5)
-		'''
 		#Forbid motors to move
 		for m in robot.motors:			
 			m.compliant = True
