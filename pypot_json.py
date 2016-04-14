@@ -6,6 +6,8 @@ import pypot.dynamixel.motor
 import pypot.robot
 from contextlib import closing
 import math
+import pygame
+
 import pprint #Var dump
 L1 = 51.0 #mm
 L2 = 63.7 #mm
@@ -144,7 +146,6 @@ def calc_leg(id, coord):
 
 def move_leg(robot, id, coord):
 	newCoord = calc_leg(id, coord)
-	print "Patte {}".format(id)
 	angle = computeIK(newCoord["x"], newCoord["y"], newCoord["z"])
 	for m in robot.motors:
 		if m.id == id*10+1:
@@ -182,12 +183,16 @@ def rotationLeg(angle, rotationAngle, diameter, height):
 def robotRotation(angles, rotationAngle, diameter, height):
 	newBasePoints = []
 	for i in range(6):
-		newBasePoints.append(rotationLeg(angles[i], rotationAngle, diameter, height))
+		if i==1 or i==3 or i==5:
+			newBasePoints.append(rotationLeg(angles[i], rotationAngle, diameter, height))
+		#else:
+		#	newBasePoints.append(rotationLeg(angles[i], rotationAngle, diameter, height))
+
 	return newBasePoints
 
 if __name__ == '__main__':
 
-	with closing(pypot.robot.from_json('robotConfig2.json')) as robot:
+	with closing(pypot.robot.from_json('robotConfig3.json')) as robot:
 		#Allow motors to move and initialize them
 		coord = {
 					"x": 0,
@@ -196,13 +201,13 @@ if __name__ == '__main__':
 		}
 		for m in robot.motors:			
 			m.compliant = False
-			#m.goal_position = 0
+			m.goal_position = 0
 		time.sleep(0.1)
 		
 
 		height = 120
 		amplitude = 30
-		stepHeight = 40
+		stepHeight = 10
 		#diameter = 200 + amplitude
 		diameter = 350
 		height = -120
@@ -235,55 +240,144 @@ if __name__ == '__main__':
 		move_leg(robot, 6, basePoints[5])
 		
 		time.sleep(3)
+
+		#########################    PYGAME    ####################################
+
+		background_color = (220,220,220)
+		button_color = (80,80,80)
+
+		size_action_surface = 200
+		rectangle_action = (100, 100, size_action_surface, size_action_surface)
+		rectangle_pointer = (0, 0, 10, 10)
+
+		diameterMove = 300
+		amplitudeMove = 150
+		offsetX = 0
+		offsetY = 0
+		centerMove = []
+		centerMove.append(posOnCircle(angles[0], diameterMove, height))
+		centerMove.append(posOnCircle(angles[1], diameterMove, height))
+		centerMove.append(posOnCircle(angles[2], diameterMove, height))
+		centerMove.append(posOnCircle(angles[3], diameterMove, height))
+		centerMove.append(posOnCircle(angles[4], diameterMove, height))
+		centerMove.append(posOnCircle(angles[5], diameterMove, height))
+
+		pygame.init()
+		running = True
+		screen = pygame.display.set_mode((600, 400))
+		pygame.display.set_caption("LuroboMitique")
+		clock = pygame.time.Clock()
+
+		while running:
+			clock.tick(120) # min FPS
+
+			leg1 = centerMove[0].copy()
+			leg2 = centerMove[1].copy()
+			leg3 = centerMove[2].copy()
+			leg4 = centerMove[3].copy()
+			leg5 = centerMove[4].copy()
+			leg6 = centerMove[5].copy()
+
+			for event in pygame.event.get():
+				if event.type  == pygame.QUIT:
+					running = False
+				elif event.type == pygame.MOUSEMOTION:
+					if (event.pos[0] >= rectangle_action[0]) and\
+					(event.pos[0] <= (rectangle_action[0] + rectangle_action[2])) and\
+					(event.pos[1] >= rectangle_action[1]) and\
+					(event.pos[1] <= (rectangle_action[1] + rectangle_action[3])):
+						rectangle_pointer = (event.pos[0]-5, event.pos[1]-5, 10, 10)
+						offsetX = (((event.pos[0] - rectangle_action[0]) - (size_action_surface / 2)) * amplitudeMove) / size_action_surface
+						offsetY = (((event.pos[1] - rectangle_action[1]) - (size_action_surface / 2)) * amplitudeMove) / size_action_surface
+			
+
+
+			leg1["x"] += offsetX
+			leg1["y"] += offsetY
+			leg2["x"] += offsetX
+			leg2["y"] += offsetY
+			leg3["x"] += offsetX
+			leg3["y"] += offsetY
+			leg4["x"] += offsetX
+			leg4["y"] += offsetY
+			leg5["x"] += offsetX
+			leg5["y"] += offsetY
+			leg6["x"] += offsetX
+			leg6["y"] += offsetY
+
+
+			move_leg(robot, 1, leg1)
+			move_leg(robot, 2, leg2)
+			move_leg(robot, 3, leg3)
+			move_leg(robot, 4, leg4)
+			move_leg(robot, 5, leg5)
+			move_leg(robot, 6, leg6)
+			
+
+			screen.fill(background_color)
+			pygame.draw.rect(screen, button_color, rectangle_action, 4)
+			pygame.draw.rect(screen, (255, 0, 0), rectangle_pointer, 4)
+			pygame.display.flip()
+
+		pygame.quit()
+		#########################    END PYGAME    ####################################
 		
 		print "ROTATION"
-		basePoints = robotRotation(angles , 25, diameter, height)
+		"""basePoints = robotRotation(angles , 0, diameter, height)
 		move_leg(robot, 1, basePoints[0])
-		move_leg(robot, 2, basePoints[1])
+		#move_leg(robot, 2, basePoints[1])
 		move_leg(robot, 3, basePoints[2])
-		move_leg(robot, 4, basePoints[3])
+		#move_leg(robot, 4, basePoints[3])
 		move_leg(robot, 5, basePoints[4])
+		#move_leg(robot, 6, basePoints[5])
+		time.sleep(2)
+		#move_leg(robot, 1, basePoints[0])
+		move_leg(robot, 2, basePoints[1])
+		#move_leg(robot, 3, basePoints[2])
+		move_leg(robot, 4, basePoints[3])
+		#move_leg(robot, 5, basePoints[4])
 		move_leg(robot, 6, basePoints[5])
-		for m in robot.shoulders:
-			m.goal_position = 25
 		for i in range(6):
-			angles[i] += 25		
+			angles[i] += 5		
 		time.sleep(3)
-				
-		basePoints = robotRotation(angles , 25, diameter, height)
+		"""
+		'''
+		basePoints = robotRotation(angles , 45, diameter, height)
 		move_leg(robot, 1, basePoints[0])
 		move_leg(robot, 2, basePoints[1])
 		move_leg(robot, 3, basePoints[2])
 		move_leg(robot, 4, basePoints[3])
 		move_leg(robot, 5, basePoints[4])
 		move_leg(robot, 6, basePoints[5])
-		for m in robot.shoulders:
-			m.goal_position = 25
 		for i in range(6):
-			angles[i] += 25		
+			angles[i] += 45		
 		time.sleep(3)		
-		
+		'''
 		i = 0
 		cpt = 0
 		angle = 5
 		
 		while True:
 			# de la rotation
-			rotPos1 = math.cos(i + (math.pi / 2)) * angle
-			rotPos2 = math.cos(i + (math.pi / 2)) * angle
+			rotPos1 = math.sin(i + math.pi) * angle
+			rotPos2 = math.sin(i) * angle
+			step1 = step(i + math.pi)
+			step1["z"] *= stepHeight
+			step2 = step(i)
+			step2["z"] *= stepHeight
 			
-			leg1 = posOnCircle(270 + rotPos2, diameter, height)
-			leg1["z"] += math.cos(i) * amplitude
-			leg2 = posOnCircle(330 + rotPos1, diameter, height)
-			leg2["z"] += math.cos(i) * amplitude
-			leg3 = posOnCircle(30 + rotPos2, diameter, height)
-			leg3["z"] += math.cos(i) * amplitude
-			leg4 = posOnCircle(90 + rotPos1, diameter, height)
-			leg4["z"] += math.cos(i) * amplitude
-			leg5 = posOnCircle(150 + rotPos2, diameter, height)
-			leg5["z"] += math.cos(i) * amplitude
-			leg6 = posOnCircle(210 + rotPos1, diameter, height)
-			leg6["z"] += math.cos(i) * amplitude
+			leg1 = posOnCircle(angles[0] + rotPos2, diameter, height)
+			leg1["z"] += step1["z"]
+			leg2 = posOnCircle(angles[1] + rotPos1, diameter, height)
+			leg2["z"] += step2["z"]
+			leg3 = posOnCircle(angles[2] + rotPos2, diameter, height)
+			leg3["z"] += step1["z"]
+			leg4 = posOnCircle(angles[3] + rotPos1, diameter, height)
+			leg4["z"] += step2["z"]
+			leg5 = posOnCircle(angles[4] + rotPos2, diameter, height)
+			leg5["z"] += step1["z"]
+			leg6 = posOnCircle(angles[5] + rotPos1, diameter, height)
+			leg6["z"] += step2["z"]
 
 			move_leg(robot, 1, leg1)
 			move_leg(robot, 2, leg2)
@@ -294,12 +388,12 @@ if __name__ == '__main__':
 
 			i+=0.1
 			cpt+=1
-			if cpt%75 ==0:
-				angle+=60
 			time.sleep(0.02)
 
-
-		"""		
+		
+		i = 0
+		cpt = 0
+		angle = 5
 		while True:
 			leg1 = step(i + (math.pi / 2))
 			tmp = rotateXY(0, (math.cos(i) * amplitude), 0, angle)
@@ -352,7 +446,7 @@ if __name__ == '__main__':
 			if cpt%75 ==0:
 				angle+=60
 			time.sleep(0.02)
-		"""
+		
 		#Forbid motors to move
 		for m in robot.motors:			
 			m.compliant = True
