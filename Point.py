@@ -2,7 +2,11 @@
 
 class Point(object):
 	def __init__(self, x=0, y=0, z=0):
-		if type(x) is dict:
+		if type(x) is type(self):
+			self.x = x.x
+			self.y = x.y
+			self.z = x.z
+		elif type(x) is dict:
 			self.x = x["x"]
 			self.y = x["y"]
 			self.z = x["z"]
@@ -14,7 +18,7 @@ class Point(object):
 			self.x = x[0]
 			self.y = x[1]
 			self.z = x[2]
-		elif type(x) is int or type(x) is float:
+		elif type(x) is int or type(x) is float or type(x) is long:
 			self.x = x
 			self.y = y
 			self.z = z
@@ -25,7 +29,13 @@ class Point(object):
 		return "Z:{: 3.3f} Y:{: 3.3f} Z:{: 3.3f}".format(self.x, self.y, self.z)
 
 	def copy(self):
-		return Point(self.c, self.y, self.z)
+		return Point(self.x, self.y, self.z)
+
+	def __neg__(self):
+		return Point(-self.x, -self.y, -self.z)
+
+	def __pos__(self):
+		return Point(self)
 
 	def __add__(self, obj): # Point + obj
 		if type(obj) is type(self):
@@ -34,7 +44,7 @@ class Point(object):
 				self.y + obj.y,
 				self.z + obj.z
 			)
-		elif type(obj) is int or type(obj) is float:
+		elif type(obj) is int or type(obj) is float or type(obj) is long:
 			return Point(
 				self.x + obj,
 				self.y + obj,
@@ -53,7 +63,7 @@ class Point(object):
 				self.y - obj.y,
 				self.z - obj.z
 			)
-		elif type(obj) is int or type(obj) is float:
+		elif type(obj) is int or type(obj) is float or type(obj) is long:
 			return Point(
 				self.x - obj,
 				self.y - obj,
@@ -69,7 +79,7 @@ class Point(object):
 				self.y / obj.y,
 				self.z / obj.z
 			)
-		elif type(obj) is int or type(obj) is float:
+		elif type(obj) is int or type(obj) is float or type(obj) is long:
 			return Point(
 				self.x / obj,
 				self.y / obj,
@@ -85,7 +95,7 @@ class Point(object):
 				self.y * obj.y,
 				self.z * obj.z
 			)
-		elif type(obj) is int or type(obj) is float:
+		elif type(obj) is int or type(obj) is float or type(obj) is long:
 			return Point(
 				self.x * obj,
 				self.y * obj,
