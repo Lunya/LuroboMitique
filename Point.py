@@ -26,7 +26,7 @@ class Point(object):
 			raise TypeError("Bad argument type [ {:s} ] expected [int], [float], [tuple], [list] or [dict]")
 
 	def __repr__(self):
-		return "Z:{: 3.3f} Y:{: 3.3f} Z:{: 3.3f}".format(self.x, self.y, self.z)
+		return "X:{: 3.3f} Y:{: 3.3f} Z:{: 3.3f}".format(self.x, self.y, self.z)
 
 	def copy(self):
 		return Point(self.x, self.y, self.z)

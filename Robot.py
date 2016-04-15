@@ -103,17 +103,16 @@ def smooth_step(x, base=10):
 	'''
 	return math.log(max(1, 1 + math.cos(x) * base), base)
 
-def rotateXY(x, y, z, angle):
+def rotateXY(pos, angle):
 	'''
 		Rotate the point at position pos arround the 0,0,0
 		point with angle in degrees. Rotation arround Z axis.
 	'''
-	pos = Point(x, y, z)
 	theta = math.radians(angle)
 	return pos * Point(
 		math.cos(theta) + -math.sin(theta),
 		math.sin(theta) + math.cos(theta),
-		0
+		1
 	)
 
 def posOnCircle(angle, diameter, height=0):
@@ -192,14 +191,19 @@ class Robot(object):
 		self.amplitude = 30
 		self.step_height = 10
 		self._base_points = [None]*6
-		self._walk_points = [None]*6
+		self._walk_points = [Point()]*6
+		self._rotate_points = [Point()]*6
 		self._angles = [270.0, 330.0, 30.0, 90.0, 150.0, 210.0]
 		self._calculate_base_pos()
 		self.sine_i = 0.0
 		self.holonom_i = 0.0
+		self._rotate_i = 0.0
+		self.holonom_direction = 0.0
+		self._rotate_angle = 0.0
 		self.center_point = Point()
 
 	def __del__(self):
+		print "robot deleted"
 		for m in self.robot.motors:
 			m.compliant = True
 
@@ -213,6 +217,7 @@ class Robot(object):
 		'''
 		for i in range(len(self._angles)):
 			self._base_points[i] = posOnCircle(self._angles[i], self.diameter, self.height)
+			self._walk_points[i] = posOnCircle(self._angles[i], self.diameter, self.height)
 
 	def base_pos(self):
 		'''
@@ -230,8 +235,13 @@ class Robot(object):
 
 	def holonom_walk(self, i, speed, angle):
 		self.holonom_i += (i * speed)
+		self.holonom_direction = angle
+
+	def _holonom_walk_calc(self):
+		'''
+		'''
 		leg1 = step(self.holonom_i + (math.pi / 2))
-		tmp = rotateXY(0, (math.cos(self.holonom_i) * self.amplitude), 0, angle)
+		tmp = rotateXY(Point(0, (math.cos(self.holonom_i) * self.amplitude), 0), self.holonom_direction)
 		leg1.z *= self.step_height
 		leg1.x = self._base_points[0].x + tmp.x
 		leg1.y = self._base_points[0].y + tmp.y
@@ -249,7 +259,7 @@ class Robot(object):
 		leg5.y = self._base_points[4].y + tmp.y
 		leg5.z += self._base_points[4].z
 
-		tmp = rotateXY(0, -(math.cos(self.holonom_i) * self.amplitude), 0, angle)
+		tmp = rotateXY(Point(0, -(math.cos(self.holonom_i) * self.amplitude), 0), self.holonom_direction)
 		
 		leg2 = step(self.holonom_i - (math.pi / 2))
 		leg2.z *= self.step_height
@@ -276,8 +286,31 @@ class Robot(object):
 		self._walk_points[4] = leg5
 		self._walk_points[5] = leg6
 
+	def rotation(self, i, speed, angle):
+		'''
+		'''
+		self._rotate_i += (i * speed)
+		self._rotate_angle = angle
+		
+
+	def _rotation_calc(self):
+		rotPos1 = math.sin(self._rotate_i + math.pi) * self._rotate_angle
+		rotPos2 = math.sin(self._rotate_i) * self._rotate_angle
+		step1 = step(self._rotate_i + math.pi)
+		step2 = step(self._rotate_i)
+
+		self._rotate_points[0] = posOnCircle(self._angles[0] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
+		self._rotate_points[1] = posOnCircle(self._angles[1] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
+		self._rotate_points[2] = posOnCircle(self._angles[2] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
+		self._rotate_points[3] = posOnCircle(self._angles[3] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
+		self._rotate_points[4] = posOnCircle(self._angles[4] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
+		self._rotate_points[5] = posOnCircle(self._angles[5] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
+
+
 	def move(self):
 		'''
 		'''
+		self._holonom_walk_calc()
+		self._rotation_calc()
 		for i in range(len(self._angles)):
-			move_leg(self.robot, i+1, self._base_points[i] + self._walk_points[i] + self.center_point)
+			move_leg(self.robot, i+1, ((self._walk_points[i] + self._rotate_points[i]) / 2.0) + self.center_point)

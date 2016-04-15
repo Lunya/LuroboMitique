@@ -5,6 +5,18 @@ from Robot import *
 interface = Interface(800, 600)
 robot = Robot('robotConfig3.json')
 i = 0.005
+def angle_holonome(a, b):
+	if a >= 0.0 and b > 0.0: # quart haut droite
+		return math.atan(a/b)
+	elif a < 0.0 and b >= 0.0: # quart haut gauche
+		return math.atan(b/abs(a)) + math.pi/2.0
+	elif a <= 0.0 and b < 0.0: # quart bas gauche
+		return math.atan(abs(a)/abs(b)) + math.pi
+	elif a > 0.0 and b <= 0.0: # quart bas droite
+		return math.atan(abs(b)/a) + math.pi*1.5
+	else:
+		return 0;
+
 def loop_function(events, **args):
 	for event in events:
 		if event.type == pygame.MOUSEBUTTONUP:
@@ -21,6 +33,14 @@ def loop_function(events, **args):
 		robot.height -= 0.6
 		robot._calculate_base_pos()
 		#robot.base_pos()
+	elif keys[pygame.K_UP]:
+		robot.holonom_walk(i, 10, 0)
+	elif keys[pygame.K_DOWN]:
+		robot.holonom_walk(i, -10, 0)
+	elif keys[pygame.K_LEFT]:
+		robot.rotation(i, 20, 5)
+	elif keys[pygame.K_RIGHT]:
+		robot.rotation(i, -20, 5)
 
 	joystick = args['joystick']
 	for i in range(joystick.get_numbuttons()):
@@ -38,11 +58,18 @@ def loop_function(events, **args):
 		robot._calculate_base_pos()
 		#robot.base_pos()
 
-	robot.holonom_walk(i, joystick.get_axis(2), 0)
+	#robot.holonom_walk(i, joystick.get_axis(2), 0)
+	rotate_angle = angle_holonome(joystick.get_axis(2), -joystick.get_axis(3))
+	rotate_angle = math.degrees(rotate_angle)
+	interface.print_text("angle {}".format(rotate_angle), (20, 100))
+	interface.print_text("force {}".format(math.sqrt(joystick.get_axis(2)**2 + joystick.get_axis(3)**2)), (20, 120))
+	robot.holonom_walk(i, 0.003*math.sqrt(joystick.get_axis(2)**2 + joystick.get_axis(3)**2), rotate_angle)
+	robot.rotation(i, joystick.get_axis(0), 1)
 
-	robot.center_point.x = joystick.get_axis(0) * 30
-	robot.center_point.y = joystick.get_axis(1) * 30
-	robot.move()
+	#robot.center_point.x = joystick.get_axis(0) * 30
+	#robot.center_point.y = joystick.get_axis(1) * 30
+	
+	#robot.move()
 
 	"""for i in range(joystick.get_numbuttons()):
 		if joystick.get_button(i) == True:
