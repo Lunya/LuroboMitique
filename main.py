@@ -2,9 +2,10 @@ from Point import *
 from Interface import *
 from Robot import *
 
-interface = Interface(800, 600)
+interface = Interface(1200, 800)
 robot = Robot('robotConfig3.json')
 i = 0.005
+
 def angle_holonome(a, b):
 	if a >= 0.0 and b > 0.0: # quart haut droite
 		return math.atan(a/b)
@@ -17,31 +18,56 @@ def angle_holonome(a, b):
 	else:
 		return 0;
 
+ref_center_point = Point(0, 0, -120)
+def smooth_point_move(point, ref_point, value=0.1):
+	if point.x < ref_point.x:
+		point.x += value
+	elif point.x > ref_point.x:
+		point.x -= value
+	if point.y < ref_point.y:
+		point.y += value
+	elif point.y > ref_point.y:
+		point.y -= value
+	if point.z < ref_point.z:
+		point.z += value
+	elif point.z > ref_point.z:
+		point.z -= value
+
+
 def loop_function(events, **args):
 	for event in events:
-		if event.type == pygame.MOUSEBUTTONUP:
+		"""if event.type == pygame.MOUSEBUTTONUP:
 			if event.button == 1:
-				interface.stop()
+				position = interface.circle_displace((200, 200), 80)"""
 	keys = args['key_pressed']
 	if keys[pygame.K_c]:
 		interface.circle_displace((100, 100), 50)
-	elif keys[pygame.K_b]:
-		robot.height += 0.6
-		robot._calculate_base_pos()
+	if keys[pygame.K_r]:
+		robot.base_pos()
+	if keys[pygame.K_b]:
+		#robot.height += 0.6
+		ref_center_point.z += 0.6
 		#robot.base_pos()
-	elif keys[pygame.K_n]:
-		robot.height -= 0.6
-		robot._calculate_base_pos()
+	if keys[pygame.K_n]:
+		#robot.height -= 0.6
+		ref_center_point.z -= 0.6
 		#robot.base_pos()
-	elif keys[pygame.K_UP]:
+	if keys[pygame.K_UP]:
 		robot.holonom_walk(i, 10, 0)
-	elif keys[pygame.K_DOWN]:
+	if keys[pygame.K_DOWN]:
 		robot.holonom_walk(i, -10, 0)
-	elif keys[pygame.K_LEFT]:
-		robot.rotation(i, 20, 5)
-	elif keys[pygame.K_RIGHT]:
+	if keys[pygame.K_LEFT]:
 		robot.rotation(i, -20, 5)
+	if keys[pygame.K_RIGHT]:
+		robot.rotation(i, 20, 5)
 
+
+	position = interface.circle_displace((200, 200), 80)
+	#robot.center_point = Point(position+(0,))*50.0
+	ref_center_point = Point(position+(0,))*20.0
+	interface.print_text("Pos: {}".format(robot.center_point), (300, 300))
+
+	"""
 	joystick = args['joystick']
 	for i in range(joystick.get_numbuttons()):
 		if joystick.get_button(i) == True:
@@ -65,11 +91,12 @@ def loop_function(events, **args):
 	interface.print_text("force {}".format(math.sqrt(joystick.get_axis(2)**2 + joystick.get_axis(3)**2)), (20, 120))
 	robot.holonom_walk(i, 0.003*math.sqrt(joystick.get_axis(2)**2 + joystick.get_axis(3)**2), rotate_angle)
 	robot.rotation(i, joystick.get_axis(0), 1)
-
+	"""
 	#robot.center_point.x = joystick.get_axis(0) * 30
 	#robot.center_point.y = joystick.get_axis(1) * 30
 	
-	#robot.move()
+	smooth_point_move(robot.center_point, ref_center_point, 1.0)
+	robot.move()
 
 	"""for i in range(joystick.get_numbuttons()):
 		if joystick.get_button(i) == True:

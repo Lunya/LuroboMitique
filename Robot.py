@@ -109,10 +109,10 @@ def rotateXY(pos, angle):
 		point with angle in degrees. Rotation arround Z axis.
 	'''
 	theta = math.radians(angle)
-	return pos * Point(
-		math.cos(theta) + -math.sin(theta),
-		math.sin(theta) + math.cos(theta),
-		1
+	return Point(
+		(math.cos(theta)*pos.x) + (-math.sin(theta)*pos.y),
+		(math.sin(theta)*pos.x) + (math.cos(theta)*pos.y),
+		pos.z
 	)
 
 def posOnCircle(angle, diameter, height=0):
@@ -186,20 +186,34 @@ class Robot(object):
 		for m in self.robot.motors:
 			m.compliant = False
 
-		self.height = height
-		self.diameter = diameter
-		self.amplitude = 30
-		self.step_height = 10
-		self._base_points = [None]*6
-		self._walk_points = [Point()]*6
-		self._rotate_points = [Point()]*6
+		self.height = height # height of the center of the robot
+		self.diameter = diameter # diameter of robot leg's circle
+		self.amplitude = 30 # amplitude/2 max of each steps in holonom walk
+		self.step_height = 10 # maximum height of legs when walking
+		self._base_points = [None]*6 # base points of legs when robot do nothing
+		self._walk_points = [Point()]*6 # position of legs when robot walks
+		self._rotate_points = [Point()]*6 # position of legs when robot rotate
+		'''
+			angles of legs on robot
+						| |
+					 ___|_|___       .
+				 \ \|    4    |/ /  /|\
+				  \_|3       5|_/    | Walk direction
+				  / |2       6| \    |
+				 / /|____1____|\ \   |
+					    | |
+					    | |
+		'''
 		self._angles = [270.0, 330.0, 30.0, 90.0, 150.0, 210.0]
-		self._calculate_base_pos()
-		self.sine_i = 0.0
-		self.holonom_i = 0.0
-		self._rotate_i = 0.0
+		self._holonom_i = 0.0 # current index in holonom move
+		self._rotate_i = 0.0 # current index in rotate move
 		self.holonom_direction = 0.0
 		self._rotate_angle = 0.0
+
+		self._calculate_base_pos()
+
+		self._is_walking = False # True if the robot walk
+		self._is_rotating = False # True if the robot rotate
 		self.center_point = Point()
 
 	def __del__(self):
@@ -223,8 +237,8 @@ class Robot(object):
 		'''
 			Put the robot in base position
 		'''
-		self.sine_i = 0.0
-		self.holonom_i = 0.0
+		self._holonom_i = 0.0
+		self._global_i = 0.0
 		for i in range(len(self._angles)):
 			move_leg(self.robot, i+1, self._base_points[i])
 
@@ -234,77 +248,95 @@ class Robot(object):
 		'''
 
 	def holonom_walk(self, i, speed, angle):
-		self.holonom_i += (i * speed)
+		self._holonom_i += (i * speed)
 		self.holonom_direction = angle
+		self._is_walking = True
 
 	def _holonom_walk_calc(self):
 		'''
 		'''
-		leg1 = step(self.holonom_i + (math.pi / 2))
-		tmp = rotateXY(Point(0, (math.cos(self.holonom_i) * self.amplitude), 0), self.holonom_direction)
-		leg1.z *= self.step_height
-		leg1.x = self._base_points[0].x + tmp.x
-		leg1.y = self._base_points[0].y + tmp.y
-		leg1.z += self._base_points[0].z
-		
-		leg3 = step(self.holonom_i + (math.pi / 2))
-		leg3.z *= self.step_height
-		leg3.x = self._base_points[2].x + tmp.x
-		leg3.y = self._base_points[2].y + tmp.y
-		leg3.z += self._base_points[2].z
+		if self._is_walking:
+			leg1 = step(self._holonom_i + (math.pi / 2))
+			tmp = rotateXY(Point(0, (math.cos(self._holonom_i) * self.amplitude), 0), self.holonom_direction)
+			leg1.z *= self.step_height
+			leg1.x = self._base_points[0].x + tmp.x
+			leg1.y = self._base_points[0].y + tmp.y
+			leg1.z += self._base_points[0].z
+			
+			leg3 = step(self._holonom_i + (math.pi / 2))
+			leg3.z *= self.step_height
+			leg3.x = self._base_points[2].x + tmp.x
+			leg3.y = self._base_points[2].y + tmp.y
+			leg3.z += self._base_points[2].z
 
-		leg5 = step(self.holonom_i + (math.pi / 2))
-		leg5.z *= self.step_height
-		leg5.x = self._base_points[4].x + tmp.x
-		leg5.y = self._base_points[4].y + tmp.y
-		leg5.z += self._base_points[4].z
+			leg5 = step(self._holonom_i + (math.pi / 2))
+			leg5.z *= self.step_height
+			leg5.x = self._base_points[4].x + tmp.x
+			leg5.y = self._base_points[4].y + tmp.y
+			leg5.z += self._base_points[4].z
 
-		tmp = rotateXY(Point(0, -(math.cos(self.holonom_i) * self.amplitude), 0), self.holonom_direction)
-		
-		leg2 = step(self.holonom_i - (math.pi / 2))
-		leg2.z *= self.step_height
-		leg2.x = self._base_points[1].x + tmp.x
-		leg2.y = self._base_points[1].y + tmp.y
-		leg2.z += self._base_points[1].z
+			tmp = rotateXY(Point(0, -(math.cos(self._holonom_i) * self.amplitude), 0), self.holonom_direction)
+			
+			leg2 = step(self._holonom_i - (math.pi / 2))
+			leg2.z *= self.step_height
+			leg2.x = self._base_points[1].x + tmp.x
+			leg2.y = self._base_points[1].y + tmp.y
+			leg2.z += self._base_points[1].z
 
-		leg4 = step(self.holonom_i - (math.pi / 2))
-		leg4.z *= self.step_height
-		leg4.x = self._base_points[3].x + tmp.x
-		leg4.y = self._base_points[3].y + tmp.y
-		leg4.z += self._base_points[3].z
+			leg4 = step(self._holonom_i - (math.pi / 2))
+			leg4.z *= self.step_height
+			leg4.x = self._base_points[3].x + tmp.x
+			leg4.y = self._base_points[3].y + tmp.y
+			leg4.z += self._base_points[3].z
 
-		leg6 = step(self.holonom_i - (math.pi / 2))
-		leg6.z *= self.step_height
-		leg6.x = self._base_points[5].x + tmp.x
-		leg6.y = self._base_points[5].y + tmp.y
-		leg6.z += self._base_points[5].z
+			leg6 = step(self._holonom_i - (math.pi / 2))
+			leg6.z *= self.step_height
+			leg6.x = self._base_points[5].x + tmp.x
+			leg6.y = self._base_points[5].y + tmp.y
+			leg6.z += self._base_points[5].z
 
-		self._walk_points[0] = leg1
-		self._walk_points[1] = leg2
-		self._walk_points[2] = leg3
-		self._walk_points[3] = leg4
-		self._walk_points[4] = leg5
-		self._walk_points[5] = leg6
+			self._walk_points[0] = leg1
+			self._walk_points[1] = leg2
+			self._walk_points[2] = leg3
+			self._walk_points[3] = leg4
+			self._walk_points[4] = leg5
+			self._walk_points[5] = leg6
+
 
 	def rotation(self, i, speed, angle):
 		'''
 		'''
 		self._rotate_i += (i * speed)
 		self._rotate_angle = angle
+		self._is_rotating = True
 		
 
 	def _rotation_calc(self):
-		rotPos1 = math.sin(self._rotate_i + math.pi) * self._rotate_angle
-		rotPos2 = math.sin(self._rotate_i) * self._rotate_angle
-		step1 = step(self._rotate_i + math.pi)
-		step2 = step(self._rotate_i)
+		if self._is_rotating:
+			if self._is_walking: # if robot walks, decelerate half legs and accelerate half others
+				# in this case, angle is ignored because rotate only in relation to te walking direction
+				for i in range(len(self._walk_points)):
+					rotated_point = rotateXY(self._walk_points[i], self.holonom_direction)
+					vector = Point(1, 1, 0) * (self._walk_points[i] - self._base_points[i])
+					if (rotated_point.x >= 0):
+						print "pattoune {} accelere, vecteur de pattoune {}".format(i+1, vector)
+						#self._walk_points[0] *= vector * 1.5
+					else:
+						print "pattoune {} ralentit, vecteur de pattoune {}".format(i+1, vector)
+						#self._walk_points[0] *= vector * 0.5
 
-		self._rotate_points[0] = posOnCircle(self._angles[0] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
-		self._rotate_points[1] = posOnCircle(self._angles[1] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
-		self._rotate_points[2] = posOnCircle(self._angles[2] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
-		self._rotate_points[3] = posOnCircle(self._angles[3] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
-		self._rotate_points[4] = posOnCircle(self._angles[4] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
-		self._rotate_points[5] = posOnCircle(self._angles[5] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
+			else: # if robot don't walk, rotate on their own
+				rotPos1 = math.sin(self._rotate_i + math.pi) * self._rotate_angle
+				rotPos2 = math.sin(self._rotate_i) * self._rotate_angle
+				step1 = step(self._rotate_i)
+				step2 = step(self._rotate_i + math.pi)
+
+				self._rotate_points[0] = posOnCircle(self._angles[0] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
+				self._rotate_points[1] = posOnCircle(self._angles[1] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
+				self._rotate_points[2] = posOnCircle(self._angles[2] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
+				self._rotate_points[3] = posOnCircle(self._angles[3] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
+				self._rotate_points[4] = posOnCircle(self._angles[4] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
+				self._rotate_points[5] = posOnCircle(self._angles[5] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
 
 
 	def move(self):
@@ -313,4 +345,21 @@ class Robot(object):
 		self._holonom_walk_calc()
 		self._rotation_calc()
 		for i in range(len(self._angles)):
-			move_leg(self.robot, i+1, ((self._walk_points[i] + self._rotate_points[i]) / 2.0) + self.center_point)
+			new_pos = self.center_point
+			if self._is_walking:
+				new_pos += self._walk_points[i]
+			elif self._is_rotating:
+				new_pos += self._rotate_points[i]
+			else:
+				new_pos += self._base_points[i]
+			#new_pos = ((self._walk_points[i] + self._rotate_points[i]) / 2.0) + self.center_point
+			move_leg(self.robot, i+1, new_pos)
+		
+		# reset booleans of movment
+		if self._is_walking:
+			self._rotate_i = 0.0
+		if self._is_rotating:
+			self._holonom_i = 0.0
+
+		self._is_walking = False
+		self._is_rotating = False

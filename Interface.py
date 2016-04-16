@@ -1,3 +1,6 @@
+from Point import *
+from Robot import rotateXY
+
 import pygame
 
 
@@ -14,6 +17,10 @@ class Interface(object):
 		self.background_color = (220, 220, 220)
 		self.menu_color = (80, 80, 80)
 		self.interest_color = (255, 80, 0)
+
+		# circles displace array
+		self._circles_displace = []
+
 
 
 	def init(self):
@@ -33,6 +40,7 @@ class Interface(object):
 		else:
 			self.joystick = None
 
+		# text initialising
 		self.font = pygame.font.SysFont('arial', 24)
 
 		self.text_infos = self.font.render('C : move center mode\nH: holonome displacment', True, self.menu_color)
@@ -44,7 +52,6 @@ class Interface(object):
 		'''
 		self.running = False
 		pygame.joystick.quit()
-		pygame.quit()
 
 	def run(self, function, **args):
 		'''
@@ -63,6 +70,13 @@ class Interface(object):
 				elif event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_q:
 						self.running = False
+
+			# clean the screen
+			self.screen.fill(self.background_color)
+			#mouse position
+			self.mouse_pos = pygame.mouse.get_pos()
+			self.print_text("Mouse: {}".format(self.mouse_pos), (10, 280))
+
 			# other events request
 			if 'key_pressed' in args:
 				args['key_pressed'] = pygame.key.get_pressed()
@@ -70,9 +84,41 @@ class Interface(object):
 				args['joystick'] = self.joystick
 
 
-			self.screen.fill(self.background_color)
 			function(events, **args)
+
+			# show interface
+			for circle in self._circles_displace:
+				# if cursor is in the circle
+				if ((self.mouse_pos[0] - circle[0][0])**2 + (self.mouse_pos[1] - circle[0][1])**2) <= circle[1]**2:
+					self._draw_crosshair(self.mouse_pos, 12)
+				else:
+					self._draw_crosshair(circle[0])
 			pygame.display.flip()
+
+			# reset values
+			self._circles_displace = []
+
+		pygame.quit()
+
+	def _draw_crosshair(self, position, size=5):
+		'''
+			draw a crosshair at the position pos
+			of the size size*2
+		'''
+		pygame.draw.line(
+			self.screen, self.interest_color,
+			(position[0] + size + 1, position[1]),
+			(position[0] - size, position[1])
+		)
+		pygame.draw.line(
+			self.screen, self.interest_color,
+			(position[0], position[1] + size + 1),
+			(position[0], position[1] - size)
+		)
+
+	def draw_button(self, pos, text):
+		'''
+		'''
 
 	def circle_displace(self, center, radius):
 		'''
@@ -81,8 +127,17 @@ class Interface(object):
 			the mouse inside on X and Y axis
 
 			position : tuple (X, Y)
+			radius : number
 		'''
+		self._circles_displace.append([center, radius]);
 		pygame.draw.circle(self.screen, self.menu_color, center, radius)
+		# if cursor is in the circle
+		if ((self.mouse_pos[0] - center[0])**2 + (self.mouse_pos[1] - center[1])**2) <= radius**2:
+			self._draw_crosshair(self.mouse_pos, 12)
+			return (-(float(center[0] - self.mouse_pos[0])) / float(radius), (float(center[1] - self.mouse_pos[1]) / float(radius)))
+		else:
+			self._draw_crosshair(center)
+			return (0, 0)
 		#pygame.draw.rect(self.screen, self.menu_color, position + (diameter, diameter))
 
 	def show_info(self, position):
@@ -90,3 +145,4 @@ class Interface(object):
 
 	def print_text(self, text, position):
 		self.screen.blit(self.font.render(text, True, self.menu_color), position)
+
