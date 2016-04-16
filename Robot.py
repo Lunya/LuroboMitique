@@ -256,6 +256,8 @@ class Robot(object):
 		'''
 		'''
 		if self._is_walking:
+			self._calculate_base_pos()
+
 			leg1 = step(self._holonom_i + (math.pi / 2))
 			tmp = rotateXY(Point(0, (math.cos(self._holonom_i) * self.amplitude), 0), self.holonom_direction)
 			leg1.z *= self.step_height
@@ -351,6 +353,7 @@ class Robot(object):
 			elif self._is_rotating:
 				new_pos += self._rotate_points[i]
 			else:
+				self._calculate_base_pos()
 				new_pos += self._base_points[i]
 			#new_pos = ((self._walk_points[i] + self._rotate_points[i]) / 2.0) + self.center_point
 			move_leg(self.robot, i+1, new_pos)
