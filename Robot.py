@@ -247,8 +247,8 @@ class Robot(object):
 			Move leg number ID at position pos
 		'''
 
-	def holonom_walk(self, i, speed, angle):
-		self._holonom_i += (i * speed)
+	def holonom_walk(self, speed, angle):
+		self._holonom_i += speed
 		self.holonom_direction = angle
 		self._is_walking = True
 
@@ -305,10 +305,10 @@ class Robot(object):
 			self._walk_points[5] = leg6
 
 
-	def rotation(self, i, speed, angle):
+	def rotation(self, speed, angle):
 		'''
 		'''
-		self._rotate_i += (i * speed)
+		self._rotate_i += speed
 		self._rotate_angle = angle
 		self._is_rotating = True
 		
