@@ -113,9 +113,6 @@ class Interface(object):
 			(position[0], position[1] - size)
 		)
 
-	def draw_button(self, pos, text):
-		'''
-		'''
 
 	def circle_displace(self, center, radius):
 		'''

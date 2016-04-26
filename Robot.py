@@ -166,6 +166,9 @@ def calc_leg(id, coord):
 
 def move_leg(robot, id, coord):
 	'''
+		Move a leg to a 3D coordinate
+		Use inverse kinematics to set angles
+		of the three motors of each leg independently
 	'''
 	newCoord = calc_leg(id, coord)
 	angle = computeIK(newCoord.x, newCoord.y, newCoord.z)
@@ -180,7 +183,12 @@ def move_leg(robot, id, coord):
 
 class Robot(object):
 	def __init__(self, config_file, height=-120, diameter=350):
-		''''''
+		'''
+			Create a simple class to interact with a robot using
+			pypot library. This class allow functions to move and
+			rotate the robot easier.
+
+		'''
 		self.robot = pypot.robot.from_json(config_file)
 
 		for m in self.robot.motors:
@@ -229,6 +237,8 @@ class Robot(object):
 
 	def _calculate_base_pos(self):
 		'''
+			Calculate the base position for the 6 legs arround the robot
+			Base position is the position taken by the hexapod when he do nothing
 		'''
 		for i in range(len(self._angles)):
 			self._base_points[i] = posOnCircle(self._angles[i], self.diameter, self.height)
@@ -249,12 +259,19 @@ class Robot(object):
 		'''
 
 	def holonom_walk(self, speed, angle):
+		'''
+		Require robot translation when move function is called
+		Move the robot at speed in angle direction
+		'''
 		self._holonom_i += speed
 		self.holonom_direction = angle
 		self._is_walking = True
 
 	def _holonom_walk_calc(self):
 		'''
+			This function calculate position of each leg to move
+			robot on required position.
+			It can be move hexapod with two or tree groups of legs
 		'''
 		if self._is_walking:
 			if self._is_two_legs:
@@ -356,6 +373,8 @@ class Robot(object):
 
 	def rotation(self, speed, angle):
 		'''
+			Require robot rotation when move function is called
+			Rotate the robot at speed of angle
 		'''
 		self._rotate_i += speed
 		self._rotate_angle = angle
@@ -363,6 +382,10 @@ class Robot(object):
 		
 
 	def _rotation_calc(self):
+		'''
+			This function calculate the position of legs when
+			a rotation is required.
+		'''
 		if self._is_rotating:
 			rotPos1 = math.sin(self._rotate_i + math.pi) * self._rotate_angle
 			rotPos2 = math.sin(self._rotate_i) * self._rotate_angle
@@ -418,6 +441,7 @@ class Robot(object):
 
 	def move(self):
 		'''
+			This function update position of all legs calling 
 		'''
 		self._calculate_base_pos()
 		self._rotation_calc()

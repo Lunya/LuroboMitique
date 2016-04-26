@@ -1,6 +1,12 @@
 
 
 class Point(object):
+	'''
+		Define a point with tree values.
+		Point have overloaded operators to faciliting
+		programmation of simple 3D operations.
+		
+	'''
 	def __init__(self, x=0, y=0, z=0):
 		if type(x) is type(self):
 			self.x = x.x
