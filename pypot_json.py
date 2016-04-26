@@ -243,8 +243,8 @@ def moveXmm(basePoints, angle, stepheight, robot, amplitude, distance):
 		move_leg(robot, 5, leg5)
 		move_leg(robot, 6, leg6)
 		
-		i+=0.1
-		time.sleep(0.02)
+		i+=0.02
+		time.sleep(0.005)
 
 def rotateThetaAngle(angles, diameter, height, robot, theta):
 	i=0
@@ -294,15 +294,12 @@ if __name__ == '__main__':
 		}
 		for m in robot.motors:			
 			m.compliant = False
-			m.goal_position = 0
-		time.sleep(0.1)
-		
 
 		height = 120
 		amplitude = 30
 		stepHeight = 10
 		#diameter = 200 + amplitude
-		diameter = 350
+		diameter = 380
 		height = -120
 		angles = []
 		angles.append(270)
@@ -332,10 +329,10 @@ if __name__ == '__main__':
 		move_leg(robot, 5, basePoints[4])
 		move_leg(robot, 6, basePoints[5])
 		
-		time.sleep(3)
+		time.sleep(1)
 
 		#########################    PYGAME    ####################################
-
+		'''
 		background_color = (220,220,220)
 		button_color = (80,80,80)
 
@@ -354,6 +351,7 @@ if __name__ == '__main__':
 		centerMove.append(posOnCircle(angles[3], diameterMove, height))
 		centerMove.append(posOnCircle(angles[4], diameterMove, height))
 		centerMove.append(posOnCircle(angles[5], diameterMove, height))
+		'''
 		"""
 		pygame.init()
 		running = True
@@ -487,12 +485,12 @@ if __name__ == '__main__':
 		'''
 		###Test Odometry
 		##Distance
-		#moveXmm(basePoints, 0, stepHeight, robot, amplitude, 150)
-		#moveXmm(basePoints, 90, stepHeight, robot, amplitude, 150)
-		#moveXmm(basePoints, 180, stepHeight, robot, amplitude, 150)
-		#moveXmm(basePoints, 270, stepHeight, robot, amplitude, 150)
+		moveXmm(basePoints, 0, stepHeight, robot, amplitude, 150)
+		moveXmm(basePoints, 90, stepHeight, robot, amplitude, 150)
+		moveXmm(basePoints, 180, stepHeight, robot, amplitude, 150)
+		moveXmm(basePoints, 270, stepHeight, robot, amplitude, 150)
 		##Rotation
-		rotateThetaAngle(angles, diameter, height, robot, 180)
+		#rotateThetaAngle(angles, diameter, height, robot, 180)
 		'''
 		i = 0
 		cpt = 0

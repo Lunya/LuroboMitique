@@ -43,8 +43,6 @@ class Interface(object):
 		# text initialising
 		self.font = pygame.font.SysFont('arial', 24)
 
-		self.text_infos = self.font.render('C : move center mode\nH: holonome displacment', True, self.menu_color)
-
 	def stop(self):
 		'''
 			Stops the program launched by run function
@@ -75,7 +73,6 @@ class Interface(object):
 			self.screen.fill(self.background_color)
 			#mouse position
 			self.mouse_pos = pygame.mouse.get_pos()
-			self.print_text("Mouse: {}".format(self.mouse_pos), (10, 280))
 
 			# other events request
 			if 'key_pressed' in args:
@@ -139,9 +136,6 @@ class Interface(object):
 			self._draw_crosshair(center)
 			return (0, 0)
 		#pygame.draw.rect(self.screen, self.menu_color, position + (diameter, diameter))
-
-	def show_info(self, position):
-		self.screen.blit(self.text_infos, position)
 
 	def print_text(self, text, position):
 		self.screen.blit(self.font.render(text, True, self.menu_color), position)
