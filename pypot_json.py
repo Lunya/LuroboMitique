@@ -191,6 +191,13 @@ def robotRotation(angles, rotationAngle, diameter, height):
 	return newBasePoints
 
 def moveXmm(basePoints, angle, stepheight, robot, amplitude, distance):
+	'''
+		This function calculate the exact amount of steps to do by robot
+		to move distance mm in angle direction.
+		Parameters stepheight, amplitude and basePoints allow to calculate
+		the number of steps.
+		robot is the object referencing to the hexapod
+	'''
 	i = 0
 	iMax = distance/(0.1*amplitude*math.pi)
 	y = iMax%(0.1*amplitude*math.pi)
@@ -247,6 +254,13 @@ def moveXmm(basePoints, angle, stepheight, robot, amplitude, distance):
 		time.sleep(0.005)
 
 def rotateThetaAngle(angles, diameter, height, robot, theta):
+	'''
+		This function calculate the exact amount of steps to do by robot
+		to rotate theta degrees.
+		Parameters height and diameter allow to calculate
+		the number of steps.
+		robot is the object referencing to the hexapod
+	'''
 	i=0
 	angle = 5
 	iMax = theta/(angle*2*0.1*math.pi)
@@ -331,158 +345,6 @@ if __name__ == '__main__':
 		
 		time.sleep(1)
 
-		#########################    PYGAME    ####################################
-		'''
-		background_color = (220,220,220)
-		button_color = (80,80,80)
-
-		size_action_surface = 200
-		rectangle_action = (100, 100, size_action_surface, size_action_surface)
-		rectangle_pointer = (0, 0, 10, 10)
-
-		diameterMove = 300
-		amplitudeMove = 150
-		offsetX = 0
-		offsetY = 0
-		centerMove = []
-		centerMove.append(posOnCircle(angles[0], diameterMove, height))
-		centerMove.append(posOnCircle(angles[1], diameterMove, height))
-		centerMove.append(posOnCircle(angles[2], diameterMove, height))
-		centerMove.append(posOnCircle(angles[3], diameterMove, height))
-		centerMove.append(posOnCircle(angles[4], diameterMove, height))
-		centerMove.append(posOnCircle(angles[5], diameterMove, height))
-		'''
-		"""
-		pygame.init()
-		running = True
-		screen = pygame.display.set_mode((600, 400))
-		pygame.display.set_caption("LuroboMitique")
-		clock = pygame.time.Clock()
-
-		while running:
-			clock.tick(120) # min FPS
-
-			leg1 = centerMove[0].copy()
-			leg2 = centerMove[1].copy()
-			leg3 = centerMove[2].copy()
-			leg4 = centerMove[3].copy()
-			leg5 = centerMove[4].copy()
-			leg6 = centerMove[5].copy()
-
-			for event in pygame.event.get():
-				if event.type  == pygame.QUIT:
-					running = False
-				elif event.type == pygame.MOUSEMOTION:
-					if (event.pos[0] >= rectangle_action[0]) and\
-					(event.pos[0] <= (rectangle_action[0] + rectangle_action[2])) and\
-					(event.pos[1] >= rectangle_action[1]) and\
-					(event.pos[1] <= (rectangle_action[1] + rectangle_action[3])):
-						rectangle_pointer = (event.pos[0]-5, event.pos[1]-5, 10, 10)
-						offsetX = (((event.pos[0] - rectangle_action[0]) - (size_action_surface / 2)) * amplitudeMove) / size_action_surface
-						offsetY = (((event.pos[1] - rectangle_action[1]) - (size_action_surface / 2)) * amplitudeMove) / size_action_surface
-			
-
-
-			leg1["x"] += offsetX
-			leg1["y"] += offsetY
-			leg2["x"] += offsetX
-			leg2["y"] += offsetY
-			leg3["x"] += offsetX
-			leg3["y"] += offsetY
-			leg4["x"] += offsetX
-			leg4["y"] += offsetY
-			leg5["x"] += offsetX
-			leg5["y"] += offsetY
-			leg6["x"] += offsetX
-			leg6["y"] += offsetY
-
-
-			move_leg(robot, 1, leg1)
-			move_leg(robot, 2, leg2)
-			move_leg(robot, 3, leg3)
-			move_leg(robot, 4, leg4)
-			move_leg(robot, 5, leg5)
-			move_leg(robot, 6, leg6)
-			
-
-			screen.fill(background_color)
-			pygame.draw.rect(screen, button_color, rectangle_action, 4)
-			pygame.draw.rect(screen, (255, 0, 0), rectangle_pointer, 4)
-			pygame.display.flip()
-
-		pygame.quit()
-		"""
-		#########################    END PYGAME    ####################################
-		
-		print "ROTATION"
-		"""basePoints = robotRotation(angles , 0, diameter, height)
-		move_leg(robot, 1, basePoints[0])
-		#move_leg(robot, 2, basePoints[1])
-		move_leg(robot, 3, basePoints[2])
-		#move_leg(robot, 4, basePoints[3])
-		move_leg(robot, 5, basePoints[4])
-		#move_leg(robot, 6, basePoints[5])
-		time.sleep(2)
-		#move_leg(robot, 1, basePoints[0])
-		move_leg(robot, 2, basePoints[1])
-		#move_leg(robot, 3, basePoints[2])
-		move_leg(robot, 4, basePoints[3])
-		#move_leg(robot, 5, basePoints[4])
-		move_leg(robot, 6, basePoints[5])
-		for i in range(6):
-			angles[i] += 5		
-		time.sleep(3)
-		"""
-		'''
-		basePoints = robotRotation(angles , 45, diameter, height)
-		move_leg(robot, 1, basePoints[0])
-		move_leg(robot, 2, basePoints[1])
-		move_leg(robot, 3, basePoints[2])
-		move_leg(robot, 4, basePoints[3])
-		move_leg(robot, 5, basePoints[4])
-		move_leg(robot, 6, basePoints[5])
-		for i in range(6):
-			angles[i] += 45		
-		time.sleep(3)		
-		'''
-		'''
-		i = 0
-		cpt = 0
-		angle = 5
-		
-		while True:
-			# de la rotation
-			rotPos1 = math.sin(i + math.pi) * angle
-			rotPos2 = math.sin(i) * angle
-			step1 = step(i + math.pi)
-			step1["z"] *= stepHeight
-			step2 = step(i)
-			step2["z"] *= stepHeight
-			
-			leg1 = posOnCircle(angles[0] + rotPos2, diameter, height)
-			leg1["z"] += step1["z"]
-			leg2 = posOnCircle(angles[1] + rotPos1, diameter, height)
-			leg2["z"] += step2["z"]
-			leg3 = posOnCircle(angles[2] + rotPos2, diameter, height)
-			leg3["z"] += step1["z"]
-			leg4 = posOnCircle(angles[3] + rotPos1, diameter, height)
-			leg4["z"] += step2["z"]
-			leg5 = posOnCircle(angles[4] + rotPos2, diameter, height)
-			leg5["z"] += step1["z"]
-			leg6 = posOnCircle(angles[5] + rotPos1, diameter, height)
-			leg6["z"] += step2["z"]
-
-			move_leg(robot, 1, leg1)
-			move_leg(robot, 2, leg2)
-			move_leg(robot, 3, leg3)
-			move_leg(robot, 4, leg4)
-			move_leg(robot, 5, leg5)
-			move_leg(robot, 6, leg6)
-
-			i+=0.1
-			cpt+=1
-			time.sleep(0.02)
-		'''
 		###Test Odometry
 		##Distance
 		moveXmm(basePoints, 0, stepHeight, robot, amplitude, 150)
@@ -491,63 +353,7 @@ if __name__ == '__main__':
 		moveXmm(basePoints, 270, stepHeight, robot, amplitude, 150)
 		##Rotation
 		#rotateThetaAngle(angles, diameter, height, robot, 180)
-		'''
-		i = 0
-		cpt = 0
-		angle = 0
-		while True:
-			leg1 = step(i + (math.pi / 2))
-			tmp = rotateXY(0, (math.cos(i) * amplitude), 0, angle)
-			leg1["z"] *= stepHeight
-			leg1["x"] = basePoints[0]["x"] + tmp["x"]
-			leg1["y"] = basePoints[0]["y"] + tmp["y"]
-			leg1["z"] += basePoints[0]["z"]
-			
-			leg3 = step(i + (math.pi / 2))
-			leg3["z"] *= stepHeight
-			leg3["x"] = basePoints[2]["x"] + tmp["x"]
-			leg3["y"] = basePoints[2]["y"] + tmp["y"]
-			leg3["z"] += basePoints[2]["z"]
-
-			leg5 = step(i + (math.pi / 2))
-			leg5["z"] *= stepHeight
-			leg5["x"] = basePoints[4]["x"] + tmp["x"]
-			leg5["y"] = basePoints[4]["y"] + tmp["y"]
-			leg5["z"] += basePoints[4]["z"]
-
-			tmp = rotateXY(0, -(math.cos(i) * amplitude), 0, angle)
-			
-			leg2 = step(i - (math.pi / 2))
-			leg2["z"] *= stepHeight
-			leg2["x"] = basePoints[1]["x"] + tmp["x"]
-			leg2["y"] = basePoints[1]["y"] + tmp["y"]
-			leg2["z"] += basePoints[1]["z"]
-
-			leg4 = step(i - (math.pi / 2))
-			leg4["z"] *= stepHeight
-			leg4["x"] = basePoints[3]["x"] + tmp["x"]
-			leg4["y"] = basePoints[3]["y"] + tmp["y"]
-			leg4["z"] += basePoints[3]["z"]
-
-			leg6 = step(i - (math.pi / 2))
-			leg6["z"] *= stepHeight
-			leg6["x"] = basePoints[5]["x"] + tmp["x"]
-			leg6["y"] = basePoints[5]["y"] + tmp["y"]
-			leg6["z"] += basePoints[5]["z"]
-			
-			move_leg(robot, 1, leg1)
-			move_leg(robot, 2, leg2)
-			move_leg(robot, 3, leg3)
-			move_leg(robot, 4, leg4)
-			move_leg(robot, 5, leg5)
-			move_leg(robot, 6, leg6)
-			
-			i+=0.1
-			cpt+=1
-			if cpt%75 ==0:
-				angle+=0
-			time.sleep(0.02)
-		'''
+		
 		#Forbid motors to move
 		for m in robot.motors:			
 			m.compliant = True

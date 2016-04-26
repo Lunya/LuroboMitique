@@ -129,6 +129,9 @@ def posOnCircle(angle, diameter, height=0):
 	)
 
 def step(i):
+	'''
+		Calculate the height of a leg at a T instant
+	'''
 	return Point(
 		0,
 		0,
@@ -137,6 +140,11 @@ def step(i):
 
 def calc_leg(id, coord):
 	'''
+		Normalize the position of each leg arround the robot
+		to match with the center of the robot.
+		Thanks to it, we only put a position from center and
+		a leg identifier to move a leg without take in count
+		his own referential.
 	'''
 	new = Point()	
 	if id==1:
@@ -274,6 +282,7 @@ class Robot(object):
 			It can be move hexapod with two or tree groups of legs
 		'''
 		if self._is_walking:
+			# if we want to move legs by groups of two
 			if self._is_two_legs:
 				pi_3 = math.pi * (2.0 / 3.0)
 
@@ -316,7 +325,7 @@ class Robot(object):
 				leg5.y = self._base_points[4].y + tmp.y
 				leg5.z += self._base_points[4].z
 
-			else:
+			else: # if we want to move legs by groups of tree
 				leg1 = step(self._holonom_i + (math.pi / 2))
 				tmp = rotateXY(Point(0, (math.cos(self._holonom_i) * self.amplitude), 0), self.holonom_direction)
 				leg1.z *= self.step_height
@@ -363,12 +372,7 @@ class Robot(object):
 			self._base_points[4] = leg5
 			self._base_points[5] = leg6
 
-			"""self._walk_points[0] = leg1
-			self._walk_points[1] = leg2
-			self._walk_points[2] = leg3
-			self._walk_points[3] = leg4
-			self._walk_points[4] = leg5
-			self._walk_points[5] = leg6"""
+
 
 
 	def rotation(self, speed, angle):
@@ -391,15 +395,7 @@ class Robot(object):
 			rotPos2 = math.sin(self._rotate_i) * self._rotate_angle
 			step1 = step(self._rotate_i)
 			step2 = step(self._rotate_i + math.pi)
-			'''
-			self._rotate_points[0] = posOnCircle(self._angles[0] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
-			self._rotate_points[1] = posOnCircle(self._angles[1] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
-			self._rotate_points[2] = posOnCircle(self._angles[2] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
-			self._rotate_points[3] = posOnCircle(self._angles[3] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
-			self._rotate_points[4] = posOnCircle(self._angles[4] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
-			self._rotate_points[5] = posOnCircle(self._angles[5] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
-			'''
-			
+
 			if self._is_walking: # if robot walks, decelerate half legs and accelerate half others
 				# in this case, angle is ignored because rotate only in relation to te walking direction
 				'''for i in range(len(self._walk_points)):
@@ -419,17 +415,6 @@ class Robot(object):
 				self._base_points[5] = (self._base_points[5] + posOnCircle(self._angles[5] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))) / 2.0
 
 			else: # if robot don't walk, rotate on their own
-				"""rotPos1 = math.sin(self._rotate_i + math.pi) * self._rotate_angle
-				rotPos2 = math.sin(self._rotate_i) * self._rotate_angle
-				step1 = step(self._rotate_i)
-				step2 = step(self._rotate_i + math.pi)
-
-				self._rotate_points[0] = posOnCircle(self._angles[0] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
-				self._rotate_points[1] = posOnCircle(self._angles[1] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
-				self._rotate_points[2] = posOnCircle(self._angles[2] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
-				self._rotate_points[3] = posOnCircle(self._angles[3] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
-				self._rotate_points[4] = posOnCircle(self._angles[4] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
-				self._rotate_points[5] = posOnCircle(self._angles[5] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))"""
 
 				self._base_points[0] = posOnCircle(self._angles[0] + rotPos2, self.diameter, self.height + (step1.z * self.step_height))
 				self._base_points[1] = posOnCircle(self._angles[1] + rotPos1, self.diameter, self.height + (step2.z * self.step_height))
@@ -448,16 +433,6 @@ class Robot(object):
 		self._holonom_walk_calc()
 		for i in range(len(self._angles)):
 			new_pos = self.center_point + self._base_points[i]
-			"""if self._is_walking:
-				new_pos += self._walk_points[i]
-			if self._is_rotating:
-				new_pos += self._rotate_points[i]
-				if self._is_walking:
-					new_pos = new_pos / 2.0
-			if not self._is_rotating or not self._is_walking:
-				self._calculate_base_pos()
-				new_pos += self._base_points[i]"""
-			#new_pos = ((self._walk_points[i] + self._rotate_points[i]) / 2.0) + self.center_point
 			move_leg(self.robot, i+1, new_pos)
 		
 		# reset booleans of movment

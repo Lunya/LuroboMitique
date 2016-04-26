@@ -21,19 +21,6 @@ def cartesian_to_polar(p):
 
 
 ref_center_point = Point(0, 0, -120)
-def smooth_point_move(point, ref_point, value=0.1):
-	if point.x < ref_point.x:
-		point.x += value
-	elif point.x > ref_point.x:
-		point.x -= value
-	if point.y < ref_point.y:
-		point.y += value
-	elif point.y > ref_point.y:
-		point.y -= value
-	if point.z < ref_point.z:
-		point.z += value
-	elif point.z > ref_point.z:
-		point.z -= value
 
 
 def loop_function(events, **args):
@@ -130,11 +117,6 @@ def loop_function(events, **args):
 		robot.holonom_walk(force * 0.1, rotate_angle-rotate_X*0.1)
 
 	#robot.center_point = ref_center_point
-	
-	#robot.center_point.x = joystick.get_axis(0) * 30
-	#robot.center_point.y = joystick.get_axis(1) * 30
-	
-	#smooth_point_move(robot.center_point, ref_center_point, 1.0)
 	
 	robot.move()
 
