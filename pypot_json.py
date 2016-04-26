@@ -347,10 +347,10 @@ if __name__ == '__main__':
 
 		###Test Odometry
 		##Distance
-		moveXmm(basePoints, 0, stepHeight, robot, amplitude, 150)
+		#moveXmm(basePoints, 0, stepHeight, robot, amplitude, 150)
 		moveXmm(basePoints, 90, stepHeight, robot, amplitude, 150)
-		moveXmm(basePoints, 180, stepHeight, robot, amplitude, 150)
-		moveXmm(basePoints, 270, stepHeight, robot, amplitude, 150)
+		#moveXmm(basePoints, 180, stepHeight, robot, amplitude, 150)
+		#moveXmm(basePoints, 270, stepHeight, robot, amplitude, 150)
 		##Rotation
 		#rotateThetaAngle(angles, diameter, height, robot, 180)
 		

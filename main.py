@@ -29,8 +29,6 @@ def loop_function(events, **args):
 			if event.button == 1:
 				position = interface.circle_displace((200, 200), 80)"""
 	keys = args['key_pressed']
-	if keys[pygame.K_c]:
-		interface.circle_displace((100, 100), 50)
 	if keys[pygame.K_r]:
 		robot.base_pos()
 	if keys[pygame.K_b]:
@@ -50,14 +48,20 @@ def loop_function(events, **args):
 	if keys[pygame.K_RIGHT]:
 		robot.rotation(0.1, 5)
 	
-	interface.print_text("Press A button to change leg walk", (40,80))
-	interface.print_text("{}".format('Three duplets of legs' if robot._is_two_legs else 'Two triplets of legs'), (40,300))
+	interface.print_text("Use arrow keys to move robot in 4 directions", (40,500))
+	interface.print_text("Use 'N' and 'B' to move vertically the center of robot", (40,530))
+	interface.print_text("Use left joystick to control the rotation and the height of the robot", (40,560))
+	interface.print_text("Use right joystick to move robot in 4 directions", (40,590))
+	interface.print_text("Use 'Q' to quit application", (40,620))
+
+	interface.print_text("Press A button to change leg walk", (40,340))
+	interface.print_text("{}".format('Three duplets of legs' if robot._is_two_legs else 'Two triplets of legs'), (40,360))
 
 	interface.print_text("Move the cursor in the circle to move the robot center", (20,80))
 	position = interface.circle_displace((200, 200), 80)
 	robot.center_point = Point(position+(0,))*50.0
 	#ref_center_point = Point(position+(0,))*20.0
-	interface.print_text("Center pos: {}".format(robot.center_point), (100, 300))
+	interface.print_text("Center position: {}".format(robot.center_point), (300, 300))
 
 	
 	joystick = args['joystick']
@@ -101,8 +105,8 @@ def loop_function(events, **args):
 		rotate_angle = math.degrees(rotate_angle - math.pi)
 	else:
 		rotate_angle = 0
-	interface.print_text("Walk direction {}".format(rotate_angle), (400, 200))
-	interface.print_text("Walk speed {}".format(math.sqrt((move_X**2) + (move_Y**2))), (400, 220))
+	interface.print_text("Walk direction {}".format(rotate_angle), (400, 140))
+	interface.print_text("Walk speed {}".format(math.sqrt((move_X**2) + (move_Y**2))), (400, 160))
 
 	if move_X < treshold and move_X > -treshold:
 		move_X = 0
@@ -110,8 +114,6 @@ def loop_function(events, **args):
 		move_Y = 0
 
 
-	interface.print_text("Move X {}".format(move_X), (400,200))
-	interface.print_text("Move Y {}".format(move_Y), (450,250))
 	force = math.sqrt(move_X**2 + move_Y**2)
 	if force != 0:
 		robot.holonom_walk(force * 0.1, rotate_angle-rotate_X*0.1)
